@@ -1,0 +1,113 @@
+name: edge-hmi-test
+
+services:
+  db:
+    image: ${REGISTRY:-203.228.107.184:5000}/btx/edge-hmi-db:${DB_IMAGE_TAG:-latest}
+    restart: always
+    pull_policy: always
+    container_name: hmi-db-postgres
+    env_file: ./.env
+    environment:
+      - TZ=${TZ:-Asia/Jakarta}
+      - POSTGRES_DB=${POSTGRES_DB:-edge_hmi}
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-1q2w3e4r}
+    ports:
+      - "5432:5432"
+    volumes:
+      - edge_hmi_data:/var/lib/postgresql/data
+      - edge_hmi_backups:/opt/edge-hmi/db/backups
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-edge_hmi}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mosquitto:
+    image: ${REGISTRY:-203.228.107.184:5000}/mosquitto:${IMAGE_TAG:-latest}
+    container_name: mqtt-mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - mosquitto_data:/mosquitto/data
+      - mosquitto_log:/mosquitto/log
+    healthcheck:
+      test: ["CMD", "mosquitto_sub", "-t", "$$SYS/#", "-C", "1", "-W", "3"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    restart: unless-stopped
+
+  telegraf:
+    image: 203.228.107.184:5000/btx/ctm_telegraf:1.0.0
+    container_name: telegraf
+    privileged: true
+    volumes:
+      - telegraf_out:/var/lib/telegraf
+      - ./telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ./telegraf/telegraf_py:/telegraf/telegraf_py
+    command: telegraf --config /etc/telegraf/telegraf.conf
+    environment:
+      - HOSTNAME=telegraf-docker
+    depends_on:
+      mosquitto:
+        condition: service_healthy
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "pgrep", "-x", "telegraf"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+  ctm_modbus_gathering:
+    image: 203.228.107.184:5000/btx/ctm_modbus_gathering:1.0.0
+    container_name: ctm_modbus_gathering
+    restart: unless-stopped
+    privileged: true
+    user: root
+    volumes:
+      - "/dev:/dev"
+      - ./ctm_modbus_gathering/app.conf:/ctm_modbus_gathering/app.conf
+      - ./ctm_modbus_gathering/logs:/ctm_modbus_gathering/logs
+    network_mode: host
+    working_dir: /ctm_modbus_gathering
+    environment:
+      - MQTT_HOST=127.0.0.1
+      - TZ=Asia/Jakarta
+
+  ctm_topic_sender:
+    build:
+      context: .
+      dockerfile: Dockerfile_2.0.0
+    image: ${REGISTRY:-203.228.107.184:5000}/btx/ctm_topic_sender:${TOPIC_SENDER_IMAGE_TAG:-2.0.0}
+    container_name: ctm_topic_sender
+    environment:
+      - TZ=${TZ:-Asia/Jakarta}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=${POSTGRES_DB:-edge_hmi}
+      - DB_USER=${POSTGRES_USER:-admin}
+      - DB_PASSWORD=${POSTGRES_PASSWORD:-1q2w3e4r}
+      - DB_CONNECT_TIMEOUT=5
+      - MQTT_HOST=mosquitto
+      - MQTT_PORT=1883
+      - MQTT_KEEPALIVE=60
+    depends_on:
+      db:
+        condition: service_healthy
+      mosquitto:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  edge_hmi_data:
+  edge_hmi_backups:
+  mosquitto_data:
+  mosquitto_log:
+  telegraf_out:
