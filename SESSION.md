@@ -34,6 +34,12 @@
 ## Work Log
 
 ### 2026-06-22
+- Added local `.env` for service compose execution and tracked `.env.example` for required compose variables.
+- Recreated `ctm_topic_sender` through `docker compose up -d --no-deps ctm_topic_sender` so the container is compose-managed again.
+- Verified `docker compose config --quiet`, `docker compose ps ctm_topic_sender`, runtime logs, and MQTT response for `OPC:PH01`.
+- Note: `.env` remains ignored by Git; update `.env.example` when adding or renaming compose variables.
+
+### 2026-06-22
 - Changed request-topic responses from a trailing empty seventh segment to an eighth topic level using `sensor_type` from `core.v_topic_mapping`.
 - Touched `app.py`, `docker-compose.yml`, `Dockerfile_2.0.0`, and added unit tests under `tests/`.
 - Verified locally with `python -m unittest discover` and `python -m compileall app.py`.
