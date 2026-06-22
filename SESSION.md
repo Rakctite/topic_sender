@@ -9,7 +9,7 @@
 ## Repositories
 - Git remote: `https://github.com/Rakctite/topic_sender.git`.
 - Main branch: `main`.
-- Latest pushed commit: `c2cda8d Release topic sender 2.0.1`.
+- Latest recorded release commit: `c2cda8d Release topic sender 2.0.1`.
 
 ## Session Discipline
 - When Codex changes files in this project, update this `SESSION.md` in the same work session.
