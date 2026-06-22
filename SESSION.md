@@ -9,7 +9,7 @@
 ## Repositories
 - Git remote: `https://github.com/Rakctite/topic_sender.git`.
 - Main branch: `main`.
-- Latest pushed commit: `1c34a2a Release topic sender 2.0.1`.
+- Latest pushed commit: `c2cda8d Release topic sender 2.0.1`.
 
 ## Session Discipline
 - When Codex changes files in this project, update this `SESSION.md` in the same work session.
@@ -42,7 +42,7 @@
 - Verified runtime logs show `Topic Sender Ver 2.0.1`, DB mapping load of 11 devices, and MQTT broker subscription.
 - Verified MQTT request/response with MAC `OPC:PH01`; response topic payload was `3120/PH/CTM/LO001/PH01/-/OPC:PLC`.
 - Note: `docker compose up -d --no-deps ctm_topic_sender` failed because local `.env` is missing; deployment was performed with `docker run` using the existing container environment values.
-- Commit hash: `1c34a2a`.
+- Release commit hash: `c2cda8d`.
 
 ### 2026-06-18
 - Initialized Git repository on branch `main`.
