@@ -85,7 +85,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile_2.0.0
-    image: ${REGISTRY:-203.228.107.184:5000}/btx/ctm_topic_sender:${TOPIC_SENDER_IMAGE_TAG:-2.0.0}
+    image: ${REGISTRY:-203.228.107.184:5000}/btx/ctm_topic_sender:${TOPIC_SENDER_IMAGE_TAG:-2.0.1}
     container_name: ctm_topic_sender
     environment:
       - TZ=${TZ:-Asia/Jakarta}

@@ -29,7 +29,7 @@ def fetch_mapping():
         conn = psycopg2.connect(**DB_CONFIG)
         cur = conn.cursor()
         cur.execute("SET search_path TO core, public")
-        query = "SELECT mac_address, process_type, line_code, equip_name, plant_bd, plant_cd FROM v_topic_mapping;"
+        query = "SELECT mac_address, process_type, line_code, equip_name, plant_bd, plant_cd, sensor_type FROM v_topic_mapping;"
         cur.execute(query)
 
         new_mapping = {}
@@ -39,7 +39,8 @@ def fetch_mapping():
                 "line_code": row[2],
                 "equip_name": row[3],
                 "plant_bd": row[4],
-                "plant_cd": row[5]
+                "plant_cd": row[5],
+                "sensor_type": row[6]
             }
         cur.close()
         return new_mapping
@@ -113,7 +114,7 @@ def on_message(client, userdata, msg):
             response_topic = f"S-C/request-topic/{mac}"
             if info:
                 response_payload = {
-                    "topic": f'{info["plant_cd"]}/{info["plant_bd"]}/{info["process_type"]}/{info["line_code"]}/{info["equip_name"]}/-/'
+                    "topic": f'{info["plant_cd"]}/{info["plant_bd"]}/{info["process_type"]}/{info["line_code"]}/{info["equip_name"]}/-/{info["sensor_type"]}'
                 }
             else:
                 response_payload = {"topic": "Unknown MAC"}
@@ -134,7 +135,7 @@ def on_message(client, userdata, msg):
 
 def main():
     global DEVICE_MAP
-    print(f"Topic Sender Ver 2.0.0")
+    print(f"Topic Sender Ver 2.0.1")
     initial_map = fetch_mapping()
     if initial_map:
         DEVICE_MAP = initial_map

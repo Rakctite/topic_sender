@@ -9,7 +9,7 @@
 ## Repositories
 - Git remote: `https://github.com/Rakctite/topic_sender.git`.
 - Main branch: `main`.
-- Latest pushed commit: `7bab7cc Initial topic sender service`.
+- Latest pushed commit: `1c34a2a Release topic sender 2.0.1`.
 
 ## Session Discipline
 - When Codex changes files in this project, update this `SESSION.md` in the same work session.
@@ -18,8 +18,8 @@
 - If the change affects integrated deployment behavior, also update the root `C:\Users\mingyu.shin\docker\SESSION.md`.
 
 ## Docker Image
-- Last recorded integrated image: `203.228.107.184:5000/btx/ctm_topic_sender:2.0.0`.
-- Compose default tag: `TOPIC_SENDER_IMAGE_TAG:-2.0.0`.
+- Last recorded integrated image: `203.228.107.184:5000/btx/ctm_topic_sender:2.0.1`.
+- Compose default tag: `TOPIC_SENDER_IMAGE_TAG:-2.0.1`.
 
 ## Latest State
 - 2026-06-18: Repository was initialized locally and pushed to GitHub.
@@ -32,6 +32,17 @@
 - Confirm whether credentials currently present as defaults in `app.py` and compose files should be moved to environment-only values.
 
 ## Work Log
+
+### 2026-06-22
+- Changed request-topic responses from a trailing empty seventh segment to an eighth topic level using `sensor_type` from `core.v_topic_mapping`.
+- Touched `app.py`, `docker-compose.yml`, `Dockerfile_2.0.0`, and added unit tests under `tests/`.
+- Verified locally with `python -m unittest discover` and `python -m compileall app.py`.
+- Built and pushed `203.228.107.184:5000/btx/ctm_topic_sender:2.0.1`; registry digest `sha256:8079435ed24eefd3444fcfd1e501cea769386bc840bfee7895fa87a72e7528d3`.
+- Deployed local container `ctm_topic_sender` with image `203.228.107.184:5000/btx/ctm_topic_sender:2.0.1` on network `edge-hmi-test_default`.
+- Verified runtime logs show `Topic Sender Ver 2.0.1`, DB mapping load of 11 devices, and MQTT broker subscription.
+- Verified MQTT request/response with MAC `OPC:PH01`; response topic payload was `3120/PH/CTM/LO001/PH01/-/OPC:PLC`.
+- Note: `docker compose up -d --no-deps ctm_topic_sender` failed because local `.env` is missing; deployment was performed with `docker run` using the existing container environment values.
+- Commit hash: `1c34a2a`.
 
 ### 2026-06-18
 - Initialized Git repository on branch `main`.
